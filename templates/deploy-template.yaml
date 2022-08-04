@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-
+Description: Multi-function packager tool for Amazon CloudFront Edge Functions (uksb-1t9uc46mc)
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
