@@ -1,4 +1,4 @@
-import { Duration,Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput,Duration,Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -11,7 +11,7 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
 
     let s3Bucket = new s3.Bucket(this, 'mfp-artifacts');
     // 👇 Lambda Chainer Function definition
-    let lambdaFunctionChainer = new lambda.Function(this, 'LambdaFunctionChainer', {
+    let lambdaFunctionChainer = new lambda.Function(this, 'LambdaFunctionPackager', {
       runtime: lambda.Runtime.NODEJS_16_X,
       memorySize: 128,
       timeout: Duration.seconds(4),
@@ -67,7 +67,7 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
     });
 
     // 👇 CloudFront Function Assemble helper
-    let cfFunctionAssembly = new lambda.Function(this, 'CloudFrontFunctionAssembly', {
+    let cloudfrontFunctionAssembly = new lambda.Function(this, 'CloudFrontFunctionAssembly', {
       runtime: lambda.Runtime.PYTHON_3_9,
       memorySize: 512,
       timeout: Duration.seconds(120),
@@ -78,6 +78,27 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
         S3_BUCKET: s3Bucket.bucketName,
         STACK_NAME: this.stackName
       },
+    });
+
+    // 👇 export LambdaFunctionPackagerName for cross-stack reference
+    new CfnOutput(this, 'LambdaFunctionPackagerName', {
+      value: lambdaFunctionChainer.functionName,
+      description: 'Lambda Function Packager',
+      exportName: 'LambdaFunctionPackagerName',
+    });
+
+    // 👇 export LambdaFunctionAssemblyName for cross-stack reference
+    new CfnOutput(this, 'LambdaFunctionAssemblyName', {
+      value: lambdaFunctionAssembly.functionName,
+      description: 'Lambda Function assembly',
+      exportName: 'LambdaFunctionAssemblyName',
+    });
+
+    // 👇 export CloudFrontFunctionAssemblyName for cross-stack reference
+    new CfnOutput(this, 'CloudFrontFunctionAssemblyName', {
+      value: cloudfrontFunctionAssembly.functionName,
+      description: 'CloudFront Function assembly',
+      exportName: 'CloudFrontFunctionAssemblyName',
     });
   }
 }
