@@ -4,9 +4,8 @@ This tool allows you to package multiple Edge Functions - Lambda@Edge or CloudFr
 
 ## Pre-requisites:
 
-1. Install 'CDK'.
-1. Install 'NPM'.
-1. Install 'AWS CLI' and configure default profile with necessary permissions to deploy resources.
+1. Install [CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html).
+1. Install [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 
 ## Steps to build
 
