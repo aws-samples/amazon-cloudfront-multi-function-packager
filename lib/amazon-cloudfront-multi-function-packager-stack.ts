@@ -1,4 +1,4 @@
-import { CfnOutput,Duration,Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput,Duration,Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -9,7 +9,9 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    let s3Bucket = new s3.Bucket(this, 'mfp-artifacts');
+    let s3Bucket = new s3.Bucket(this, 'mfp-artifacts',{
+      removalPolicy: RemovalPolicy.DESTROY
+    });
     // 👇 Lambda Chainer Function definition
     let lambdaFunctionChainer = new lambda.Function(this, 'LambdaFunctionPackager', {
       runtime: lambda.Runtime.NODEJS_16_X,
