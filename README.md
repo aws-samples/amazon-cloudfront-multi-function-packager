@@ -9,11 +9,11 @@ This tool allows you to package multiple Edge Functions - Lambda@Edge or CloudFr
 
 ## Steps to build
 
-1. Clone and deploy the CDK solution in AWS N.Virginia region (*us-east-1)*
+1. Clone this repository
 
-git clone https://github.com/aws-samples/amazon-cloudfront-multi-function-packager
+`git clone https://github.com/aws-samples/amazon-cloudfront-multi-function-packager`
 
-2. Change into the directory and run below commands
+1. Change into the directory and run below commands
 - `cd amazon-cloudfront-multi-function-package`
 - `npm install`
 - `cdk deploy`
