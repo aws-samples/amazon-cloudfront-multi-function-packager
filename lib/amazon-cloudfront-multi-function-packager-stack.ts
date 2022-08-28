@@ -95,21 +95,21 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
     });
 
     // 👇 export LambdaFunctionPackagerName for cross-stack reference
-    new CfnOutput(this, 'LambdaFunctionPackagerName', {
+    new CfnOutput(this, `${Stack.of(this).stackName}-LambdaFunctionPackagerName`, {
       value: lambdaFunctionChainer.functionName,
       description: 'Lambda Function Packager',
-      exportName: 'LambdaFunctionPackagerName',
+      // exportName: 'LambdaFunctionPackagerName',
     });
 
     // 👇 export LambdaFunctionAssemblyName for cross-stack reference
-    new CfnOutput(this, 'LambdaFunctionAssemblyName', {
+    new CfnOutput(this, `${Stack.of(this).stackName}-LambdaFunctionAssemblyName`, {
       value: lambdaFunctionAssembly.functionName,
       description: 'Lambda Function assembly',
       exportName: 'LambdaFunctionAssemblyName',
     });
 
     // 👇 export CloudFrontFunctionAssemblyName for cross-stack reference
-    new CfnOutput(this, 'CloudFrontFunctionAssemblyName', {
+    new CfnOutput(this, `${Stack.of(this).stackName}-CloudFrontFunctionAssemblyName`, {
       value: cloudfrontFunctionAssembly.functionName,
       description: 'CloudFront Function assembly',
       exportName: 'CloudFrontFunctionAssemblyName',
