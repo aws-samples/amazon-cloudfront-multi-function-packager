@@ -26,14 +26,29 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
       statements: [
         new iam.PolicyStatement({
           resources: ['*'],
+          actions: ['lambda:CreateFunction'],
+        }),
+        new iam.PolicyStatement({
+          resources: ['*'],
           actions: ['iam:ListAttachedRolePolicies','iam:CreateRole','iam:AttachRolePolicy'],
         }),
         new iam.PolicyStatement({
-          resources: [s3Bucket.bucketArn],
+          resources: [`${s3Bucket.bucketArn}/*`],
           actions: ['s3:PutObject','s3:GetObject'],
+        }),
+        new iam.PolicyStatement({
+          resources: ['*'],
+          actions: ['iam:PassRole'],
+          conditions:{
+            "StringEquals": {
+                "iam:PassedToService": "lambda.amazonaws.com"
+            }
+        },
         }),
       ],
     });
+
+    
 
     let customRole = new iam.Role(this, 'Role', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
