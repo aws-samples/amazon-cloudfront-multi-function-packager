@@ -105,14 +105,14 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
     new CfnOutput(this, `${Stack.of(this).stackName}-LambdaFunctionAssemblyName`, {
       value: lambdaFunctionAssembly.functionName,
       description: 'Lambda Function assembly',
-      exportName: 'LambdaFunctionAssemblyName',
+      // exportName: 'LambdaFunctionAssemblyName',
     });
 
     // 👇 export CloudFrontFunctionAssemblyName for cross-stack reference
     new CfnOutput(this, `${Stack.of(this).stackName}-CloudFrontFunctionAssemblyName`, {
       value: cloudfrontFunctionAssembly.functionName,
       description: 'CloudFront Function assembly',
-      exportName: 'CloudFrontFunctionAssemblyName',
+      // exportName: 'CloudFrontFunctionAssemblyName',
     });
   }
 }
