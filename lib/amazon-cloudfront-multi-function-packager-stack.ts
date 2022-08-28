@@ -26,11 +26,9 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
       statements: [
         new iam.PolicyStatement({
           resources: ['*'],
-          actions: ['lambda:CreateFunction'],
-        }),
-        new iam.PolicyStatement({
-          resources: ['*'],
-          actions: ['iam:ListAttachedRolePolicies','iam:CreateRole','iam:AttachRolePolicy'],
+          actions: ['lambda:CreateFunction','lambda:UpdateFunctionCode',
+          'lambda:UpdateFunctionConfiguration','lambda:AddPermission',
+          'iam:ListAttachedRolePolicies','iam:CreateRole','iam:AttachRolePolicy'],
         }),
         new iam.PolicyStatement({
           resources: [`${s3Bucket.bucketArn}/*`],
@@ -40,18 +38,17 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
           resources: ['*'],
           actions: ['iam:PassRole'],
           conditions:{
-            "StringEquals": {
-                "iam:PassedToService": "lambda.amazonaws.com"
+                "StringEquals": {
+                    "iam:PassedToService": "lambda.amazonaws.com"
+                }
             }
-        },
         }),
       ],
     });
 
-    
-
     let customRole = new iam.Role(this, 'Role', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com',
+    ),
       inlinePolicies: {
         customPolicy: customPolicy,
       },
@@ -77,7 +74,7 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
       role: customRole,
       code: lambda.Code.fromAsset(path.join(__dirname, '/../src/lambda-functions/assembly-lambda-function/')),
       environment: {
-        LAMBDA_CHAINER_ARN: lambdaFunctionChainer.functionArn,
+        LAMBDA_CHAINER_ARN: `${lambdaFunctionChainer.functionArn}:$LATEST`,
         S3_BUCKET: s3Bucket.bucketName,
         STACK_NAME: this.stackName
       },

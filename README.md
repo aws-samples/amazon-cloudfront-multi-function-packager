@@ -16,6 +16,7 @@ This tool allows you to package multiple Edge Functions - Lambda@Edge or CloudFr
 2. Change into the directory and run below commands
 - `cd amazon-cloudfront-multi-function-package`
 - `npm install`
+- `cdk bootstrap`
 - `cdk deploy`
 
 ## Security
