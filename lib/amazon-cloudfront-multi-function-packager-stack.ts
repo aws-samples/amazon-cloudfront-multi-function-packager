@@ -27,6 +27,7 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
         new iam.PolicyStatement({
           resources: ['*'],
           actions: ['lambda:CreateFunction','lambda:UpdateFunctionCode',
+          'cloudfront:GetFunction','cloudfront:CreateFunction',
           'lambda:UpdateFunctionConfiguration','lambda:AddPermission',
           'iam:ListAttachedRolePolicies','iam:CreateRole','iam:AttachRolePolicy'],
         }),
