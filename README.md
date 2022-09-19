@@ -114,7 +114,72 @@ The ‘*index.js*’ the main multi-function packager function which orchestrate
 
 ### Procedure to chain CloudFront Functions:
 
+1. To combine CloudFront Functions, navigate to *{StackName}-CloudFrontFunctionAssembly* function on the [CloudFront Functions console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions) in us-east-1.
 
+2. Switch to the ‘Test’ tab to create a test event.
+![Procedure to chain CloudFront functions](images/cloudfront_functions.png "Procedure to chain CloudFront functions")
+
+Define a ‘*New Event*’ with following JSON structure to combine CloudFront Functions using the function name and their deployment stage.
+
+```
+{
+  "viewer-request": [
+    {
+      "function_name": "Function Name",
+      "stage": "DEVELOPMENT || LIVE"
+    },
+    {
+      "function_name": "CanaryFunction",
+      "stage": "DEVELOPMENT || LIVE"
+    },
+    {
+        "function_name":"AddIndexHtml",
+        "stage":"DEVELOPMENT || LIVE"
+    }
+  ]
+}
+
+```
+
+Example to combine CloudFront functions and attach to single event trigger.
+```
+{
+  "viewer-request": [
+    {
+      "function_name": "TrueClientIP",
+      "stage": "DEVELOPMENT"
+    },
+    {
+      "function_name": "CanaryFunction",
+      "stage": "LIVE"
+    },
+    {
+        "function_name":"AddIndexHtml",
+        "stage":"DEVELOPMENT"
+    }
+  ]
+}
+```
+
+Note: Change Function name and stage to match your environment
+
+*Save changes* to the event.
+
+3. Select Test in the CloudFront functions console to generate the new Combined CloudFront Function.
+
+4. Check the CloudFront Functions console for the newly created combined Function. Study the code structure.
+
+5. Test if it works.
+
+### Things happening as part of the assembly process for Lambda@Edge functions:
+
+1.	Runtimes of individual functions are checked to be same and if they don’t match then execution stops. For example, the build will fail if two functions with runtimes Node12.x and Node14.x are being combined. 
+2.	Timeout is computed by summing the individual timeouts of the functions. It is further capped depending on the maximum allowed timeout allowed for an event type. For example, while combining two functions with 3 sec each for a viewer request trigger, though the summation yields 6 seconds it would be set at 5sec (maximum timeout for viewer event triggers)
+3.	Memory is set to the maximum memory across the individual functions. For example, for two functions with memory allocated as 128 MB and 256 MB for an origin facing event, the memory for the combined function is set at 256 MB.
+4.	If you are combining multiple events types in viewer type or origin type or using both viewer and origin types together, then the maximum memory allowed is capped accordingly. For example, if we combine viewer side and origin side functions having memory 128 MB and 256 MB, then the combined function will be set at 128 MB so it can work across these triggers.
+5.	The IAM policies of the individual functions are combined into a new role which is assigned to the generated function.
+6.	The handler names of individual functions are auto inferred which are the entry point for invoking the individual functions. This can be viewed in the ‘handler’ field in functions.json file.
+7.	S3 bucket provided during deployment holds the combined function zip files under the prefix ‘assembly_function/’
 
 ## Security
 
