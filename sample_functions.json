@@ -1,0 +1,26 @@
+{
+    "origin-request": [
+        {
+            "function_name": "ABTestingCookieFunction",
+            "handler": "index.handler"
+        },
+        {
+            "function_name": "DeviceDetectionFunction",
+            "handler": "index.handler"
+        },
+        {
+            "function_name": "RedirectionFunction",
+            "handler": "index.handler"
+        }
+    ],
+    "origin-response": [
+        {
+            "function_name": "CacheControlFunction",
+            "handler": "entrypoint.hook"
+        },
+        {
+            "function_name": "HSTSInsertionFunction",
+            "handler": "entrypoint.hook"
+        }
+    ]
+}
