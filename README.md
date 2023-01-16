@@ -18,7 +18,7 @@ npm audit fix
 cdk bootstrap 
 cdk deploy
 ```
-1. The stack creates an S3 bucket to hold assembled code artifacts and three Lambda Functions explained below.
+2. The stack creates an S3 bucket to hold assembled code artifacts and three Lambda Functions explained below.
 *{StackName}-LambdaFunctionPackager{UniqueID}* which is the main Lambda Multi-function packager
 
 ## Usage
