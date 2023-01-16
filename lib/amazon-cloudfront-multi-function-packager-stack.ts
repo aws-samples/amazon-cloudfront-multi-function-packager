@@ -1,4 +1,4 @@
-import { CfnOutput,Duration,Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -9,7 +9,7 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    let s3Bucket = new s3.Bucket(this, 'mfp-artifacts',{
+    let s3Bucket = new s3.Bucket(this, 'mfp-artifacts', {
       removalPolicy: RemovalPolicy.DESTROY
     });
     // 👇 Lambda Chainer Function definition
@@ -26,34 +26,34 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
       statements: [
         new iam.PolicyStatement({
           resources: ['*'],
-          actions: ['lambda:CreateFunction','lambda:UpdateFunctionCode',
-          'cloudfront:GetFunction','cloudfront:CreateFunction',
-          'lambda:UpdateFunctionConfiguration','lambda:AddPermission',
-          'iam:ListAttachedRolePolicies','iam:CreateRole','iam:AttachRolePolicy'],
+          actions: ['lambda:CreateFunction', 'lambda:UpdateFunctionCode',
+            'cloudfront:GetFunction', 'cloudfront:CreateFunction',
+            'lambda:UpdateFunctionConfiguration', 'lambda:AddPermission',
+            'iam:ListAttachedRolePolicies', 'iam:CreateRole', 'iam:AttachRolePolicy'],
         }),
         new iam.PolicyStatement({
           resources: [`${s3Bucket.bucketArn}/*`],
-          actions: ['s3:PutObject','s3:GetObject'],
+          actions: ['s3:PutObject', 's3:GetObject'],
         }),
         new iam.PolicyStatement({
           resources: ['*'],
           actions: ['iam:PassRole'],
-          conditions:{
-                "StringEquals": {
-                    "iam:PassedToService": "lambda.amazonaws.com"
-                }
+          conditions: {
+            "StringEquals": {
+              "iam:PassedToService": "lambda.amazonaws.com"
             }
+          }
         }),
       ],
     });
 
     let customRole = new iam.Role(this, 'Role', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com',
-    ),
+      ),
       inlinePolicies: {
         customPolicy: customPolicy,
       },
-      managedPolicies:[
+      managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
           'service-role/AWSLambdaBasicExecutionRole',
         ),

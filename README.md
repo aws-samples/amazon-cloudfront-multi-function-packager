@@ -29,7 +29,7 @@ This tool allows you to package multiple Edge Functions - Lambda@Edge or CloudFr
 
 2.	 We will use the ‘Test’ feature of AWS Lambda service to build our combined function artifacts. Switch to the ‘Test’ tab to ‘Create new event’, give it a name.
 
-![Procedure to chain Lambda@Edge functions](images/lambda_functions.jpg "Procedure to chain Lambda@Edge functions")
+![Procedure to chain Lambda@Edge functions](images/lambda_function_assembly.png "Procedure to chain Lambda@Edge functions")
 
 For ‘Event JSON’ use below JSON structure to combine Lambda@Edge Functions using their ARNs.
 ```
@@ -124,10 +124,10 @@ The ‘*index.js*’ the main multi-function packager function which orchestrate
 
 ### Procedure to chain CloudFront Functions:
 
-1. To combine CloudFront Functions, navigate to *{StackName}-CloudFrontFunctionAssembly* function on the [CloudFront Functions console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions) in us-east-1.
+1. To combine CloudFront Functions, navigate to *{StackName}-CloudFrontFunctionAssembly* function on the [AWS Lambda console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions) in us-east-1.
 
 2. Switch to the ‘Test’ tab to create a test event.
-![Procedure to chain CloudFront functions](images/cloudfront_functions.png "Procedure to chain CloudFront functions")
+![Procedure to chain CloudFront functions](images/cloudfront_function_assembly.png "Procedure to chain CloudFront functions")
 
 Define a ‘*New Event*’ with following JSON structure to combine CloudFront Functions using the function name and their deployment stage.
 
