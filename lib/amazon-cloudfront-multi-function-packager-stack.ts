@@ -29,7 +29,8 @@ export class AmazonCloudfrontMultiFunctionPackagerStack extends Stack {
           actions: ['lambda:CreateFunction', 'lambda:UpdateFunctionCode',
             'cloudfront:GetFunction', 'cloudfront:CreateFunction',
             'lambda:UpdateFunctionConfiguration', 'lambda:AddPermission',
-            'iam:ListAttachedRolePolicies', 'iam:CreateRole', 'iam:AttachRolePolicy'],
+            'iam:ListAttachedRolePolicies', 'iam:CreateRole', 'iam:AttachRolePolicy',
+            'iam:PutRolePolicy'],
         }),
         new iam.PolicyStatement({
           resources: [`${s3Bucket.bucketArn}/*`],

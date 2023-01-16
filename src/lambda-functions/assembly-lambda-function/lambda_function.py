@@ -40,7 +40,8 @@ def lambda_handler(event, context):
 
     # identify the memory, runtime, timeout and function polcies
 
-    functionPolicyArns = None
+    functionManagedPolicyArns = None
+    functionInlinePolicies = None
     runtime = ""
     timeout = 1
     memory = 128
@@ -49,8 +50,9 @@ def lambda_handler(event, context):
         runtime = identifyRuntime(functionDefinitions)
         memory = calculateTotalMemory(functionDefinitions)
         timeout = calculateTotalTimeout(functionDefinitions)
-        functionPolicyArns = getFunctionAttachedPolicyArns(functionDefinitions)
-
+        functionManagedPolicyArns = getFunctionAttachedManagedPolicyArns(functionDefinitions)
+        functionInlinePolicies = getFunctionAttachedInlinePolicies(functionDefinitions)
+        
     except Exception as e:
         log.error(e)
         return
@@ -58,7 +60,8 @@ def lambda_handler(event, context):
     log.info(f'runtimes :{runtime}')
     log.info(f'timeout :{timeout}')
     log.info(f'memory :{memory}')
-    log.info(f'function policie Arns {functionPolicyArns}')
+    log.info(f'function managed policie Arns {functionManagedPolicyArns}')
+    log.info(f'function inline policie Arns {functionInlinePolicies}')
 
     # used in description of combined Lambda Function
     functionsCombined = []
@@ -115,7 +118,7 @@ def lambda_handler(event, context):
     # create consistent hash of function names to be used.
     combinedFunctionName = "{}-{}-{}".format(os.environ["STACK_NAME"],"CombinedFunction",uid)
 
-    combinedFunctionDescription = "LambdaChainer:{}".format("-".join(functionsCombined))
+    combinedFunctionDescription = os.environ["STACK_NAME"]+':{}'.format("-".join(functionsCombined))
 
     # zip the functions combined and upload to S3
     s3FileName = f'assembly_function/{combinedFunctionName}.zip'
@@ -124,7 +127,7 @@ def lambda_handler(event, context):
     s3.meta.client.upload_file(zipFileName, os.environ["S3_BUCKET"], s3FileName)
 
     # create the LambdaChainer Function & Role
-    combinedRoleArn = createCombinedFunctionRole(os.environ["STACK_NAME"],functionPolicyArns,uid)
+    combinedRoleArn = createCombinedFunctionRole(os.environ["STACK_NAME"],functionManagedPolicyArns,functionInlinePolicies,uid)
 
     # added sleep since the IAM role propagation takes a small amount of time and sometimes
     # Lambda function creation fails in the interim
@@ -135,7 +138,6 @@ def lambda_handler(event, context):
         createLambdaFunction(combinedFunctionName, combinedFunctionDescription, combinedRoleArn,s3FileName,memory,runtime,timeout)
     cleanup(zipFileName,baseDir)
     log.info(f'Combined function name created:{combinedFunctionName}')
-
 
 # check code package size depending on Event Type
 def checkFunctionCodeSize(zipFileName,event):
@@ -196,7 +198,7 @@ def cleanup(zipFileName, baseDir):
         log.error(f'Error: {e.filename} - {e.strerror}')
     # print("Created function :{}".format(response))
 
-def getFunctionAttachedPolicyArns(functionDefinitions):
+def getFunctionAttachedManagedPolicyArns(functionDefinitions):
 
     functionPolicyArns = []
     for eventType in functionDefinitions:
@@ -207,11 +209,45 @@ def getFunctionAttachedPolicyArns(functionDefinitions):
             response = iamClient.list_attached_role_policies(
                 RoleName=roleName
             )
+            log.info(f'Fetching managed role response :{response}')
+
             for policy in response["AttachedPolicies"]:
                 functionPolicyArns.append(policy['PolicyArn'])
+
+            response = iamClient.list_role_policies(
+                RoleName=roleName
+            )
+            log.info(f'Fetching custom policies response :{response}')
+
+            # for policy in response["PolicyNames"]:
+            #     functionPolicyArns.append(policy['PolicyArn'])
+
     return functionPolicyArns
 
-def createCombinedFunctionRole(stackName, functionPolicyArns, hash):
+def getFunctionAttachedInlinePolicies(functionDefinitions):
+
+    functionInlinePolicies = []
+    for eventType in functionDefinitions:
+        for functionDefinition in functionDefinitions[eventType]:
+            roleARN = functionDefinition["Configuration"]["Role"]
+            roleName = roleARN[roleARN.rindex("/")+1:]
+            log.info(f'Fetching inline policies for role :{roleName}')
+            response = iamClient.list_role_policies(
+                RoleName=roleName
+            )
+            log.info(f'Fetching custom policies response :{response}')
+
+            for policyName in response["PolicyNames"]:
+                
+                policy = iamClient.get_role_policy(
+                   RoleName=roleName,
+                   PolicyName=policyName
+                )
+                functionInlinePolicies.append(policy)
+
+    return functionInlinePolicies
+    
+def createCombinedFunctionRole(stackName, functionPolicyArns,functionInlinePolicies, hash):
 
     assumeRolePolicyDocument = '{ \
             "Version": "2012-10-17", \
@@ -246,7 +282,19 @@ def createCombinedFunctionRole(stackName, functionPolicyArns, hash):
             RoleName=combinedRoleName,
             PolicyArn=policyArn
         )
-    log.info('Attached policies')
+    log.info('Attached managed policies')
+    
+    index = 1
+    for policy in functionInlinePolicies:
+        log.info(f"policy doc {json.dumps(policy['PolicyDocument'])}")
+        response = iamClient.put_role_policy(
+            RoleName=combinedRoleName,
+            PolicyName="{}-{}".format(policy['RoleName'],policy['PolicyName']),
+            PolicyDocument=json.dumps(policy['PolicyDocument'])
+        )
+        index = index+1
+    log.info('Attached inline policies')
+
 
     return combinedRoleArn
 
